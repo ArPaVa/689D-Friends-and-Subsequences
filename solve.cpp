@@ -38,8 +38,8 @@ Node join(Node node1, Node node2) {
     return Node(max(node1.maxValue, node2.maxValue), min(node1.minValue, node2.minValue));
 }
 struct SegmentTree {
-    long long lowIndex[MAX_SIZE * 2], highIndex[MAX_SIZE * 2], arrA[MAX_SIZE], arrB[MAX_SIZE];
-    Node treeValues[MAX_SIZE * 2];
+    long long lowIndex[MAX_SIZE<<2], highIndex[MAX_SIZE<<2], arrA[MAX_SIZE], arrB[MAX_SIZE];
+    Node treeValues[MAX_SIZE<<2];
 
     void buildSegmentTree(long long nodeIndex, long long left, long long right) {   
         // Recursively constructs the segment tree. If the specified range is a leaf (i.e., left == right), it initializes the segment with 
@@ -50,15 +50,10 @@ struct SegmentTree {
             treeValues[nodeIndex] = Node(arrA[left], arrB[left]);
             return;
         }
-        long long mid = (left + right) / 2; // Find mid-point
-        long long leftChildIndex = nodeIndex * 2; //nodeIndex << 1;
-        long long rightChildIndex;
-        if (leftChildIndex % 2 == 0)
-            rightChildIndex = leftChildIndex + 1; 
-        else 
-            rightChildIndex = leftChildIndex; 
-        //cout << "for " << nodeIndex << " with l = " << left << " and r = " << right << endl;
-        //cout << mid << " " <<  leftChildIndex <<  " " << rightChildIndex << endl; 
+        long long mid = (left + right) >> 1; // (left + right) / 2 // Find mid-point
+        long long leftChildIndex = nodeIndex << 1; // nodeIndex * 2
+        long long rightChildIndex = leftChildIndex | 1;      // if (leftChildIndex % 2 == 0) { rightChildIndex = leftChildIndex + 1; } else {rightChildIndex = leftChildIndex; }
+        
         // Recursively build the left and right subtrees
         buildSegmentTree(leftChildIndex, left, mid);
         buildSegmentTree(rightChildIndex, mid + 1, right);   
@@ -82,13 +77,9 @@ struct SegmentTree {
         if (left <= currentLeft && currentRight <= right)
             return treeValues[nodeIndex];
 
-        long long mid = (currentLeft + currentRight) >> 1;
-        long long leftChildIndex = nodeIndex << 1;
-        long long rightChildIndex;
-        if (leftChildIndex % 2 == 0)
-            rightChildIndex = leftChildIndex + 1; 
-        else 
-            rightChildIndex = leftChildIndex; 
+        long long mid = (currentLeft + currentRight) >> 1; // (currentLeft + currentRight) / 2
+        long long leftChildIndex = nodeIndex << 1;         // nodeIndex * 2
+        long long rightChildIndex = leftChildIndex | 1;      // if (leftChildIndex % 2 == 0) { rightChildIndex = leftChildIndex + 1; } else {rightChildIndex = leftChildIndex; }
         
         // Recursively query the appropriate segment
         if (mid < left)
@@ -104,7 +95,7 @@ struct SegmentTree {
         long long mid, result = 1e16, result2 = maxIndex + 1;
         
         while(left <= right){
-            mid = (left + right) / 2;
+            mid = (left + right) >> 1; // (left + right) / 2
             Node current = rangeQuery(1, mid, maxIndex);
             if (current.maxValue > current.minValue)
                 left = mid + 1; // Move right if max > min
@@ -120,7 +111,7 @@ struct SegmentTree {
         left = 1, right = maxIndex;
 
         while(left <= right){
-            mid = (left + right) / 2;
+            mid = (left + right) >> 1; // (left + right) / 2
             Node current = rangeQuery(1, mid, maxIndex);
             if (current.maxValue >= current.minValue)
                 left = mid + 1; // Move right if max >= min
